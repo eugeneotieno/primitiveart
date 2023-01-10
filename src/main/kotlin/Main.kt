@@ -1,176 +1,64 @@
+package signature
+
+import java.io.File
+import java.util.*
+
 fun main() {
     print("Enter name and surname: ")
-    val fullName = readln().trim()
+    val name = readln()
     print("Enter person's status: ")
-    val status = readln().trim()
-
-    var fullNameLength = 0
-    val name = fullName.substringBefore(" ")
-    fullNameLength += name.length * 4 + (name.length - 1)
-    if (name.lowercase().contains("i")) fullNameLength -= 3
-    if (name.lowercase().contains("j")) fullNameLength -= 2
-    if (name.lowercase().contains("t")) fullNameLength -= 1
-    if (name.lowercase().contains("w")) fullNameLength += 1
-    if (name.lowercase().contains("y")) fullNameLength += 1
-
-    fullNameLength += 6
-
-    val surname = fullName.substringAfter(" ")
-    fullNameLength += surname.length * 4 + (surname.length -1)
-    if (surname.lowercase().contains("i")) fullNameLength -= 3
-    if (surname.lowercase().contains("j")) fullNameLength -= 2
-    if (surname.lowercase().contains("t")) fullNameLength -= 1
-    if (surname.lowercase().contains("w")) fullNameLength += 1
-    if (surname.lowercase().contains("y")) fullNameLength += 1
-
-    var length = 6
-    length += if (fullName.length > status.length) {
-        fullNameLength
-    } else {
-        status.length
-    }
-
-    repeat(length) {
-        print("*")
-    }
-
-    println()
-
-    //name
-    val firstSpaceName = (length - fullNameLength) / 2
-    val secondSpaceName = (length - fullNameLength) - firstSpaceName - 1
-
-    //row 1
-    print("*")
-
-    repeat(firstSpaceName - 1) {
-        print(" ")
-    }
-
-    repeat(name.length) { index ->
-        print(getFont(name[index].toString(), 1))
-        print(" ")
-    }
-
-    print("     ")
-
-    repeat(surname.length) { index ->
-        print(getFont(surname[index].toString(), 1))
-        print(" ")
-    }
-
-    repeat(secondSpaceName - 1) {
-        print(" ")
-    }
-
-    print("*")
-
-    println()
-
-    //row 2
-    print("*")
-
-    repeat(firstSpaceName - 1) {
-        print(" ")
-    }
-
-    repeat(name.length) { index ->
-        print(getFont(name[index].toString(), 2))
-        print(" ")
-    }
-
-    print("     ")
-
-    repeat(surname.length) { index ->
-        print(getFont(surname[index].toString(), 2))
-        print(" ")
-    }
-
-    repeat(secondSpaceName - 1) {
-        print(" ")
-    }
-
-    print("*")
-
-    println()
-
-    //row 3
-    print("*")
-
-    repeat(firstSpaceName - 1) {
-        print(" ")
-    }
-
-    repeat(name.length) { index ->
-        print(getFont(name[index].toString(), 3))
-        print(" ")
-    }
-
-    print("     ")
-
-    repeat(surname.length) { index ->
-        print(getFont(surname[index].toString(), 3))
-        print(" ")
-    }
-
-    repeat(secondSpaceName - 1) {
-        print(" ")
-    }
-
-    print("*")
-
-    println()
-
-    //status
-    print("*")
-
-    val firstSpace = (length - status.length) / 2
-    repeat(firstSpace - 1) {
-        print(" ")
-    }
-
-    print(status)
-
-    val secondSpace = (length - status.length) - firstSpace
-    repeat(secondSpace - 1) {
-        print(" ")
-    }
-
-    print("*")
-
-    println()
-
-    repeat(length) {
-        print("*")
-    }
+    val status =  readln()
+    getSignature(name, status)
 }
 
-fun getFont(letter: String, row: Int): String {
-    val row1 = mutableListOf("____", "___ ", "____", "___ ", "____", "____", "____", "_  _", "_", " _", "_  _",
-        "_   ", "_  _", "_  _", "____", "___ ", "____", "____", "____", "___", "_  _", "_  _", "_ _ _", "_  _",
-        "_   _", "___ "
-    )
-    val row2 = mutableListOf("|__|", "|__]", "|   ", "|  \\", "|___", "|___", "| __", "|__|", "|", " |", "|_/ ",
-        "|   ", "|\\/|", "|\\ |", "|  |", "|__]", "|  |", "|__/", "[__ ", " | ", "|  |", "|  |", "| | |", " \\/ ",
-        " \\_/ ", "  / "
-    )
-    val row3 = mutableListOf("|  |", "|__]", "|___", "|__/", "|___", "|   ", "|__]", "|  |", "|", "_|", "| \\_",
-        "|___", "|  |", "| \\|", "|__|", "|   ", "|_\\|", "|  \\", "___]", " | ", "|__|", " \\/ ", "|_|_|", "_/\\_",
-        "  |  ", " /__"
-    )
+fun getSignature(name: String, status: String) {
+    val roman = Fonts(File("src/roman.txt"))
+    val medium = Fonts(File("src/medium.txt"))
 
-    val line = "abcdefghijklmnopqrstuvwxyz"
-    val index = line.indexOf(letter.lowercase())
+    val nameLn = getLine(roman, name)
+    val nameLen = nameLn?.get(0)?.length
+    val statusLn = getLine(medium, status)
+    val statusLen = statusLn?.get(0)?.length
 
-    return when(row) {
-        1 -> {
-            row1[index]
-        }
-        2 -> {
-            row2[index]
-        }
-        else -> {
-            row3[index]
-        }
+    val asteriskLine = { println("8".repeat((nameLen?.let { statusLen?.let { it1 -> maxOf(it, it1) } }
+        ?.plus(Fonts.indent * 2)!!) + 4)) }
+
+    fun statusIndent(right: Boolean = false): String {
+        val ind = maxOf(nameLen!! - statusLen!! + Fonts.indent * 2, Fonts.indent * 2)
+        return " ".repeat(ind / 2 + if (right) ind % 2 else 0)
+    }
+
+    fun fontIndent(right: Boolean = false): String {
+        val ind = statusLen!! - nameLen!!
+        return " ".repeat(maxOf(Fonts.indent, ind / 2 + Fonts.indent + if (right) ind % 2 else 0))
+    }
+
+    asteriskLine()
+    nameLn!!.forEach { println("88${fontIndent()}$it${fontIndent(true)}88") }
+    statusLn!!.forEach { println("88${statusIndent()}$it${statusIndent(true)}88") }
+    asteriskLine()
+}
+
+fun getLine(font: Fonts, str: String): Array<String?>? {
+    val size = font.letters['a']?.size
+    val line = size?.let { List(it) { mutableListOf<CharSequence>() } }
+    for (ch in str) {
+        if (ch == ' ') line!!.forEach { font.space.let { it1 -> it.add(it1) } } else
+            font.letters[ch].run { line!!.forEachIndexed { i, ln -> font.letters[ch]?.get(i)?.let { ln.add(it) } } }
+    }
+    return size?.let { Array(it) { i -> line?.get(i)?.joinToString("") } }
+}
+
+class Fonts(file: File) {
+    val letters = with(Scanner(file)) {
+        val linesPer = nextInt()
+        val charsIn = nextInt()
+        List<Pair<Char, List<CharSequence>>>(charsIn) {
+            Pair(next().single().also { nextLine() }, List(linesPer) { nextLine() }) }.toMap()
+    }
+    val space: String = letters['a']?.get(0)?.length.let { " ".repeat(it!!) }
+
+    companion object {
+        const val indent = 2
     }
 }
